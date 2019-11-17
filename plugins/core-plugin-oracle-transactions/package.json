@@ -1,0 +1,32 @@
+{
+    "name": "@deanpress/core-plugin-oracle-transactions",
+    "version": "2.6.0-next.4",
+    "description": "Oracle transactions for ARK bridgechains",
+    "license": "MIT",
+    "contributors": [
+        "Dean van Dugteren <dean@nos.io>"
+    ],
+    "files": [
+        "dist"
+    ],
+    "main": "dist/index",
+    "types": "dist/index",
+    "scripts": {
+        "build": "yarn clean && tsc",
+        "build:watch": "yarn clean && yarn compile -w",
+        "clean": "del dist",
+        "compile": "../../node_modules/typescript/bin/tsc",
+        "prepublishOnly": "yarn build"
+    },
+    "dependencies": {
+        "@arkecosystem/core-container": "^2.6.0-next.4",
+        "@arkecosystem/core-event-emitter": "^2.6.0-next.4",
+        "@arkecosystem/core-interfaces": "^2.6.0-next.4",
+        "@deanpress/core-plugin-oracles-crypto": "^2.6.0-next.4",
+        "@arkecosystem/core-transactions": "^2.6.0-next.4",
+        "@arkecosystem/crypto": "^2.6.0-next.4"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
+}
