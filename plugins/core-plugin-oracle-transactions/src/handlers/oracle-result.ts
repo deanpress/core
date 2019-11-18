@@ -2,7 +2,6 @@ import { app } from "@arkecosystem/core-container";
 import { Database, EventEmitter, State, TransactionPool } from "@arkecosystem/core-interfaces";
 import { Handlers } from "@arkecosystem/core-transactions";
 import { Interfaces as TransactionInterfaces } from "@arkecosystem/core-transactions";
-import { roundCalculator } from "@arkecosystem/core-utils";
 import { Interfaces, Transactions, Utils } from "@arkecosystem/crypto";
 import {
     Interfaces as OracleInterfaces,
@@ -44,9 +43,8 @@ export class OracleResultTransactionHandler extends Handlers.TransactionHandler 
     ): Promise<void> {
         // Error if sender is not active delegate
         const database: Database.IDatabaseService = app.resolvePlugin("database");
-        const lastBlock = await database.getLastBlock();
-        const roundInfo = roundCalculator.calculateRound(lastBlock.data.height);
-        const delegates: State.IWallet[] = await database.getActiveDelegates(roundInfo);
+        const delegates: State.IWallet[] = await database.getActiveDelegates();
+
         if (!delegates.find(delegate => delegate.publicKey === transaction.data.senderPublicKey)) {
             throw new SenderNotActiveDelegateError();
         }
