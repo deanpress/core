@@ -6,6 +6,9 @@ export const startServer = async config => {
     const server = await createServer({
         host: config.host,
         port: config.port,
+        routes: {
+            cors: true,
+        },
     });
 
     // Statistics
@@ -13,7 +16,7 @@ export const startServer = async config => {
         method: "GET",
         path: "/oracle/{requestId}",
         async handler(request, h) {
-            const results = await Oracle.findOne({ request_id: request.params.requestId });
+            const results = await Oracle.find({ requestId: request.params.requestId });
             if (results) {
                 return results;
             } else {

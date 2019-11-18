@@ -11,7 +11,7 @@ export class OracleResultBuilder extends Transactions.TransactionBuilder<OracleR
         this.data.type = OracleTransactionType.OracleResult;
         this.data.fee = OracleResultTransaction.staticFee();
         this.data.amount = Utils.BigNumber.ZERO;
-        this.data.asset = { OracleResultTransaction: {} };
+        this.data.asset = { oracleResult: {} };
     }
 
     public oracleResultAsset(oracleResultAsset: IOracleResultAsset): OracleResultBuilder {

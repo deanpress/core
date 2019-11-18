@@ -1,8 +1,9 @@
 import { app } from "@arkecosystem/core-container";
 import { Database, EventEmitter, State, TransactionPool } from "@arkecosystem/core-interfaces";
 import { Handlers } from "@arkecosystem/core-transactions";
+import { Interfaces as TransactionInterfaces } from "@arkecosystem/core-transactions";
 import { roundCalculator } from "@arkecosystem/core-utils";
-import { Interfaces, Transactions } from "@arkecosystem/crypto";
+import { Interfaces, Transactions, Utils } from "@arkecosystem/crypto";
 import {
     Interfaces as OracleInterfaces,
     Transactions as OracleTransactions,
@@ -31,6 +32,11 @@ export class OracleResultTransactionHandler extends Handlers.TransactionHandler 
         return;
     }
 
+    public dynamicFee(context: TransactionInterfaces.IDynamicFeeContext): Utils.BigNumber {
+        // override dynamicFee calculation as this is a zero-fee transaction
+        return Utils.BigNumber.ZERO;
+    }
+
     public async throwIfCannotBeApplied(
         transaction: Interfaces.ITransaction,
         wallet: State.IWallet,
@@ -41,7 +47,7 @@ export class OracleResultTransactionHandler extends Handlers.TransactionHandler 
         const lastBlock = await database.getLastBlock();
         const roundInfo = roundCalculator.calculateRound(lastBlock.data.height);
         const delegates: State.IWallet[] = await database.getActiveDelegates(roundInfo);
-        if (!delegates.includes(wallet)) {
+        if (!delegates.find(delegate => delegate.publicKey === transaction.data.senderPublicKey)) {
             throw new SenderNotActiveDelegateError();
         }
 

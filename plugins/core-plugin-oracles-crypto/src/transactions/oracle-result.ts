@@ -1,6 +1,6 @@
 import { Transactions, Utils } from "@arkecosystem/crypto";
 import ByteBuffer from "bytebuffer";
-import { OracleTransactionGroup, OracleTransactionStaticFees, OracleTransactionType } from "../enums";
+import { OracleTransactionGroup, OracleTransactionType } from "../enums";
 import { IOracleResultAsset } from "../interfaces";
 import { oracleResultSchema } from "./utils/oracle-schemas";
 
@@ -18,6 +18,7 @@ export class OracleResultTransaction extends Transactions.Transaction {
             properties: {
                 type: { transactionType: OracleTransactionType.OracleResult },
                 typeGroup: { const: OracleTransactionGroup },
+                fee: { bignumber: { minimum: 0, maximum: 0 } },
                 amount: { bignumber: { minimum: 0, maximum: 0 } },
                 asset: {
                     type: "object",
@@ -34,7 +35,7 @@ export class OracleResultTransaction extends Transactions.Transaction {
         });
     }
 
-    protected static defaultStaticFee: Utils.BigNumber = Utils.BigNumber.make(OracleTransactionStaticFees.OracleResult);
+    protected static defaultStaticFee: Utils.BigNumber = Utils.BigNumber.ZERO;
 
     public serialize(): ByteBuffer {
         const { data } = this;
@@ -64,8 +65,10 @@ export class OracleResultTransaction extends Transactions.Transaction {
 
         const requestLength: number = buf.readUint8();
         const request: string = buf.readString(requestLength);
+
         const responseCodeLength: number = buf.readUint8();
         const responseCode: number = Number(buf.readString(responseCodeLength));
+
         const resultLength: number = buf.readUint8();
         const result: string = buf.readString(resultLength);
 

@@ -12,6 +12,6 @@ export const oracleResultSchema = {
         type: "integer",
     },
     result: {
-        $ref: "alphanumeric",
+        type: "string",
     },
 };
