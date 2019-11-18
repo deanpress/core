@@ -1,6 +1,6 @@
 {
     "name": "@deanpress/core-plugin-oracles-crypto",
-    "version": "2.6.0-next.4",
+    "version": "2.6.0-next.5",
     "description": "Oracle transactions for ARK Core bridgechains",
     "license": "MIT",
     "contributors": [
