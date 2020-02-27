@@ -305,6 +305,31 @@ describe("Blockchain", () => {
             expect(wallet.balance).toEqual(Utils.BigNumber.ZERO);
             expect(walletForger.getAttribute<Utils.BigNumber>("delegate.voteBalance")).toEqual(initialVoteBalance);
         });
+
+        it("should restore delegate lastBlock after a rollback", async () => {
+            const mockCallback = jest.fn(() => true);
+
+            let nextForger = await getNextForger();
+            const originalForger = nextForger;
+            const originalForgerKeys = delegates.find(wallet => wallet.publicKey === originalForger.publicKey);
+            const walletForger = blockchain.database.walletManager.findByPublicKey(originalForgerKeys.publicKey);
+
+            for (let i = 0; i <= 204; i++) {
+                const forgerKeys = delegates.find(wallet => wallet.publicKey === nextForger.publicKey);
+                const block = createBlock(forgerKeys, []);
+                await blockchain.processBlocks([block], mockCallback);
+                nextForger = await getNextForger();
+            }
+
+            console.log(walletForger.getAttribute("delegate.lastBlock"));
+            const lastBlock = walletForger.getAttribute("delegate.lastBlock");
+            expect(lastBlock).toBeTruthy();
+            // Now rewind 53 blocks
+            await blockchain.removeBlocks(53);
+            console.log(walletForger.getAttribute("delegate.lastBlock"));
+            expect(walletForger.getAttribute("delegate.lastBlock")).toBeTruthy();
+            expect(walletForger.getAttribute("delegate.lastBlock")).not.toEqual(lastBlock);
+        });
     });
 
     describe("getActiveDelegates", () => {

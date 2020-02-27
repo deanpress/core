@@ -1,4 +1,6 @@
-import { State } from "@arkecosystem/core-interfaces";
+import { app } from "@arkecosystem/core-container";
+import { Database, State } from "@arkecosystem/core-interfaces";
+import { IBlocksBusinessRepository } from "@arkecosystem/core-interfaces/dist/core-database";
 import { Errors, Handlers } from "@arkecosystem/core-transactions";
 import { Enums, Identities, Interfaces, Transactions, Utils } from "@arkecosystem/crypto";
 import assert from "assert";
@@ -86,7 +88,7 @@ export class Wallet implements State.IWallet {
         return false;
     }
 
-    public revertBlock(block: Interfaces.IBlockData): boolean {
+    public async revertBlock(block: Interfaces.IBlockData): Promise<boolean> {
         if (
             block.generatorPublicKey === this.publicKey ||
             Identities.Address.fromPublicKey(block.generatorPublicKey) === this.address
@@ -99,8 +101,24 @@ export class Wallet implements State.IWallet {
             delegate.forgedRewards = delegate.forgedRewards.minus(block.reward);
             delegate.producedBlocks--;
 
-            // TODO: get it back from database?
-            delegate.lastBlock = undefined;
+            // Only retrieve lastBlock from db if databaseService exists: delegate.lastBlock becomes undefined if no lastBlock (or no databaseService in case of unit tests)
+            const databaseService: Database.IDatabaseService = app.resolvePlugin<Database.IDatabaseService>("database");
+            let blocksRepository: IBlocksBusinessRepository;
+
+            if (databaseService) {
+                blocksRepository = databaseService.blocksBusinessRepository;
+            }
+
+            let lastBlock;
+            if (blocksRepository) {
+                const query = await blocksRepository.search({ generatorPublicKey: this.publicKey, limit: 1 });
+                // Only assign result to lastBlock if a row is returned
+                if (query && query.rows && Array(query.rows).length) {
+                    lastBlock = query.rows[0];
+                }
+            }
+
+            delegate.lastBlock = lastBlock || undefined;
 
             return true;
         }
